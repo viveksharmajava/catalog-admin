@@ -74,3 +74,17 @@ export function findProducts(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function findProdCatalogs(payload) {
+  return request('/catalog/prod-catalogs/find', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createProdCatalog(payload) {
+  return request('/catalog/prod-catalogs', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

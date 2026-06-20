@@ -5,7 +5,9 @@ import RequireRoles from './auth/RequireRoles';
 import AdminLayout from './components/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import CreateProductPage from './pages/CreateProductPage';
+import CreateCatalogPage from './pages/CreateCatalogPage';
 import FindProductPage from './pages/FindProductPage';
+import FindCatalogPage from './pages/FindCatalogPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
@@ -35,15 +37,16 @@ export default function App() {
             </RequireRoles>
           }
         />
+        <Route path="catalog/find" element={<FindCatalogPage />} />
         <Route
-          path="catalog"
+          path="catalog/create"
           element={
-            <PlaceholderPage
-              title="Catalog"
-              description="Catalog management screens will be available here."
-            />
+            <RequireRoles roles={WRITE_ROLES}>
+              <CreateCatalogPage />
+            </RequireRoles>
           }
         />
+        <Route path="catalog" element={<Navigate to="/catalog/find" replace />} />
         <Route
           path="category"
           element={
