@@ -4,8 +4,8 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import RequireRoles from './auth/RequireRoles';
 import AdminLayout from './components/AdminLayout';
 import LoginPage from './pages/LoginPage';
-import CreateProductPage from './pages/CreateProductPage';
-import CreateCatalogPage from './pages/CreateCatalogPage';
+import ProductFormPage from './pages/ProductFormPage';
+import CatalogFormPage from './pages/CatalogFormPage';
 import FindProductPage from './pages/FindProductPage';
 import FindCatalogPage from './pages/FindCatalogPage';
 import PlaceholderPage from './pages/PlaceholderPage';
@@ -33,7 +33,15 @@ export default function App() {
           path="products/create"
           element={
             <RequireRoles roles={WRITE_ROLES}>
-              <CreateProductPage />
+              <ProductFormPage />
+            </RequireRoles>
+          }
+        />
+        <Route
+          path="products/edit/:productId"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <ProductFormPage />
             </RequireRoles>
           }
         />
@@ -42,7 +50,15 @@ export default function App() {
           path="catalog/create"
           element={
             <RequireRoles roles={WRITE_ROLES}>
-              <CreateCatalogPage />
+              <CatalogFormPage />
+            </RequireRoles>
+          }
+        />
+        <Route
+          path="catalog/edit/:prodCatalogId"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <CatalogFormPage />
             </RequireRoles>
           }
         />

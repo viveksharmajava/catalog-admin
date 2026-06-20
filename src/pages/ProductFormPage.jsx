@@ -1,83 +1,32 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CollapsibleSection from '../components/CollapsibleSection';
 import FormField from '../components/FormField';
 import {
   createProduct,
   fetchCategories,
+  fetchProduct,
   fetchProductStatuses,
   fetchProductTypes,
+  updateProduct,
 } from '../api/catalogApi';
+import {
+  initialProductForm,
+  productDtoToForm,
+  productFormToPayload,
+} from '../utils/productForm';
 
-const initialForm = {
-  productId: '',
-  productTypeId: 'FINISHED_GOOD',
-  primaryProductCategoryId: '',
-  statusId: 'DRAFT',
-  internalName: '',
-  brandName: '',
-  productName: '',
-  sku: '',
-  description: '',
-  longDescription: '',
-  comments: '',
-  introductionDate: '',
-  releaseDate: '',
-  salesDiscontinuationDate: '',
-  virtualProduct: false,
-  variant: false,
-  returnable: true,
-  taxable: true,
-  chargeShipping: true,
-  requireInventory: true,
-  shippingWeight: '',
-  productWeight: '',
-  productHeight: '',
-  productWidth: '',
-  productDepth: '',
-  keywords: '',
-};
+export default function ProductFormPage() {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const isEdit = Boolean(productId);
 
-function toPayload(form) {
-  return {
-    productId: form.productId.trim() || undefined,
-    productTypeId: form.productTypeId,
-    primaryProductCategoryId: form.primaryProductCategoryId || undefined,
-    statusId: form.statusId,
-    internalName: form.internalName || form.productName,
-    brandName: form.brandName || undefined,
-    productName: form.productName,
-    sku: form.sku || undefined,
-    description: form.description || undefined,
-    longDescription: form.longDescription || undefined,
-    comments: form.comments || undefined,
-    introductionDate: form.introductionDate ? `${form.introductionDate}T00:00:00` : undefined,
-    releaseDate: form.releaseDate ? `${form.releaseDate}T00:00:00` : undefined,
-    salesDiscontinuationDate: form.salesDiscontinuationDate
-      ? `${form.salesDiscontinuationDate}T00:00:00`
-      : undefined,
-    virtualProduct: form.virtualProduct,
-    variant: form.variant,
-    returnable: form.returnable,
-    taxable: form.taxable,
-    chargeShipping: form.chargeShipping,
-    requireInventory: form.requireInventory,
-    shippingWeight: form.shippingWeight ? Number(form.shippingWeight) : undefined,
-    productWeight: form.productWeight ? Number(form.productWeight) : undefined,
-    productHeight: form.productHeight ? Number(form.productHeight) : undefined,
-    productWidth: form.productWidth ? Number(form.productWidth) : undefined,
-    productDepth: form.productDepth ? Number(form.productDepth) : undefined,
-    keywords: form.keywords
-      ? form.keywords.split(',').map((k) => k.trim()).filter(Boolean)
-      : [],
-  };
-}
-
-export default function CreateProductPage() {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(initialProductForm);
   const [productTypes, setProductTypes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [loadingRefs, setLoadingRefs] = useState(true);
+  const [loadingProduct, setLoadingProduct] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -102,6 +51,24 @@ export default function CreateProductPage() {
     loadReferenceData();
   }, []);
 
+  useEffect(() => {
+    if (!isEdit || !productId) return;
+
+    async function loadProduct() {
+      setLoadingProduct(true);
+      setError('');
+      try {
+        const product = await fetchProduct(productId);
+        setForm(productDtoToForm(product));
+      } catch (err) {
+        setError(err.message || 'Failed to load product');
+      } finally {
+        setLoadingProduct(false);
+      }
+    }
+    loadProduct();
+  }, [isEdit, productId]);
+
   function updateField(name, value) {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -115,42 +82,61 @@ export default function CreateProductPage() {
       setError('Product Name is required.');
       return;
     }
-    if (!form.internalName.trim() && form.productName.trim()) {
-      updateField('internalName', form.productName);
-    }
 
     setSubmitting(true);
     try {
-      const created = await createProduct(toPayload(form));
-      setSuccess(`Product created: ${created.productId} (${created.productName})`);
-      setForm(initialForm);
+      if (isEdit) {
+        const updated = await updateProduct(productId, productFormToPayload(form, true));
+        setSuccess(`Product updated: ${updated.productId} (${updated.productName})`);
+      } else {
+        const created = await createProduct(productFormToPayload(form, false));
+        setSuccess(`Product created: ${created.productId} (${created.productName})`);
+        setForm(initialProductForm);
+      }
     } catch (err) {
-      setError(err.message || 'Failed to create product');
+      setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} product`);
     } finally {
       setSubmitting(false);
     }
   }
 
+  const loading = loadingRefs || loadingProduct;
+
   return (
     <div>
       <div className="screenlet">
-        <div className="screenlet-title">Create Product</div>
+        <div className="screenlet-title screenlet-title-bar">
+          <span>{isEdit ? 'Edit Product' : 'Create Product'}</span>
+          <Link to="/products/find" className="add-product-link">
+            Back to Find Product
+          </Link>
+        </div>
         <div className="screenlet-body">
-          <p>OFBiz-inspired product create form for the catalog microservice.</p>
+          <p>
+            {isEdit
+              ? 'Update product details. Product ID cannot be changed.'
+              : 'OFBiz-inspired product create form for the catalog microservice.'}
+          </p>
           {error && <div className="alert alert-error">{error}</div>}
           {success && <div className="alert alert-success">{success}</div>}
-          {loadingRefs ? (
-            <p>Loading reference data…</p>
+          {loading ? (
+            <p>{loadingProduct ? 'Loading product…' : 'Loading reference data…'}</p>
           ) : (
             <form onSubmit={handleSubmit}>
               <CollapsibleSection title="Identification" defaultOpen>
                 <div className="form-grid">
-                  <FormField label="Product ID" hint="Optional. Auto-generated if blank.">
+                  <FormField
+                    label="Product ID"
+                    hint={isEdit ? 'Read-only identifier.' : 'Optional. Auto-generated if blank.'}
+                  >
                     <input
                       value={form.productId}
                       onChange={(e) => updateField('productId', e.target.value)}
                       maxLength={20}
                       placeholder="PROD-..."
+                      readOnly={isEdit}
+                      disabled={isEdit}
+                      className={isEdit ? 'readonly-field' : undefined}
                     />
                   </FormField>
                   <FormField label="SKU">
@@ -373,19 +359,25 @@ export default function CreateProductPage() {
 
               <div className="form-actions">
                 <button className="btn-primary" type="submit" disabled={submitting}>
-                  {submitting ? 'Creating…' : 'Create Product'}
+                  {submitting ? (isEdit ? 'Updating…' : 'Creating…') : isEdit ? 'Update Product' : 'Create Product'}
                 </button>
-                <button
-                  className="btn-secondary"
-                  type="button"
-                  onClick={() => {
-                    setForm(initialForm);
-                    setError('');
-                    setSuccess('');
-                  }}
-                >
-                  Reset
-                </button>
+                {isEdit ? (
+                  <button className="btn-secondary" type="button" onClick={() => navigate('/products/find')}>
+                    Cancel
+                  </button>
+                ) : (
+                  <button
+                    className="btn-secondary"
+                    type="button"
+                    onClick={() => {
+                      setForm(initialProductForm);
+                      setError('');
+                      setSuccess('');
+                    }}
+                  >
+                    Reset
+                  </button>
+                )}
               </div>
             </form>
           )}

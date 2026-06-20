@@ -68,6 +68,17 @@ export function createProduct(payload) {
   });
 }
 
+export function fetchProduct(productId) {
+  return request(`/catalog/products/${encodeURIComponent(productId)}`);
+}
+
+export function updateProduct(productId, payload) {
+  return request(`/catalog/products/${encodeURIComponent(productId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
 export function findProducts(payload) {
   return request('/catalog/products/find', {
     method: 'POST',
@@ -85,6 +96,17 @@ export function findProdCatalogs(payload) {
 export function createProdCatalog(payload) {
   return request('/catalog/prod-catalogs', {
     method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchProdCatalog(prodCatalogId) {
+  return request(`/catalog/prod-catalogs/${encodeURIComponent(prodCatalogId)}`);
+}
+
+export function updateProdCatalog(prodCatalogId, payload) {
+  return request(`/catalog/prod-catalogs/${encodeURIComponent(prodCatalogId)}`, {
+    method: 'PUT',
     body: JSON.stringify(payload),
   });
 }

@@ -422,6 +422,22 @@ textarea {
   padding: 1.5rem;
 }
 
+.entity-link {
+  font-weight: 700;
+  color: var(--emerald-700);
+  text-decoration: underline;
+}
+
+.entity-link:hover {
+  color: var(--emerald-900);
+}
+
+.readonly-field {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  cursor: not-allowed;
+}
+
 .results-pagination {
   display: flex;
   align-items: center;
