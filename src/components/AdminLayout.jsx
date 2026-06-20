@@ -1,14 +1,12 @@
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-
-const WRITE_ROLES = ['ADMIN', 'CATALOG_MANAGER', 'MERCHANDISER'];
 
 function menuClass(isActive) {
   return isActive ? 'main-menu-link active' : 'main-menu-link';
 }
 
 export default function AdminLayout() {
-  const { auth, logout, canAccess } = useAuth();
+  const { auth, logout } = useAuth();
   const location = useLocation();
   const productsActive = location.pathname.startsWith('/products');
   const catalogActive = location.pathname.startsWith('/catalog');
@@ -32,14 +30,6 @@ export default function AdminLayout() {
           </nav>
         </div>
         <div className="topbar-right">
-          {canAccess(WRITE_ROLES) && (
-            <Link to="/products/create" className="add-product-link">
-              <span className="add-product-icon" aria-hidden="true">
-                +
-              </span>
-              Add Product
-            </Link>
-          )}
           <div className="topbar-meta">
             <span>{auth?.username}</span>
             <span>({auth?.roles?.join(', ')})</span>

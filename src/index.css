@@ -176,6 +176,13 @@ textarea {
   font-weight: 700;
 }
 
+.screenlet-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .screenlet-body {
   padding: 1rem;
 }

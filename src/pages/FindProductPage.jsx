@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { findProducts } from '../api/catalogApi';
+import { useAuth } from '../auth/AuthContext';
 import SearchCriteriaField from '../components/SearchCriteriaField';
+
+const WRITE_ROLES = ['ADMIN', 'CATALOG_MANAGER', 'MERCHANDISER'];
 
 const emptyCriteria = { operator: 'contains', value: '', ignoreCase: true };
 
@@ -31,6 +35,7 @@ function criteriaHasCondition(criteria) {
 }
 
 export default function FindProductPage() {
+  const { canAccess } = useAuth();
   const [form, setForm] = useState(defaultForm);
   const [results, setResults] = useState(null);
   const [page, setPage] = useState(0);
@@ -167,7 +172,17 @@ export default function FindProductPage() {
   return (
     <div>
       <div className="screenlet">
-        <div className="screenlet-title">Find Product</div>
+        <div className="screenlet-title screenlet-title-bar">
+          <span>Find Product</span>
+          {canAccess(WRITE_ROLES) && (
+            <Link to="/products/create" className="add-product-link">
+              <span className="add-product-icon" aria-hidden="true">
+                +
+              </span>
+              Add Product
+            </Link>
+          )}
+        </div>
         <div className="screenlet-body">
           <p>OFBiz-style product search with field operators (equals, contains, begins with, etc.).</p>
           {error && <div className="alert alert-error">{error}</div>}
