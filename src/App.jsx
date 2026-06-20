@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './auth/ProtectedRoute';
 import RequireRoles from './auth/RequireRoles';
 import AdminLayout from './components/AdminLayout';
+import CategoryLayout from './components/CategoryLayout';
 import LoginPage from './pages/LoginPage';
 import ProductFormPage from './pages/ProductFormPage';
 import CatalogFormPage from './pages/CatalogFormPage';
@@ -10,6 +11,9 @@ import CategoryFormPage from './pages/CategoryFormPage';
 import FindProductPage from './pages/FindProductPage';
 import FindCatalogPage from './pages/FindCatalogPage';
 import FindCategoryPage from './pages/FindCategoryPage';
+import CategoryRollupPage from './pages/CategoryRollupPage';
+import CategoryProductsPage from './pages/CategoryProductsPage';
+import CategoryCatalogsPage from './pages/CategoryCatalogsPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
 const READ_ROLES = ['ADMIN', 'CATALOG_MANAGER', 'MERCHANDISER', 'VIEWER'];
@@ -64,24 +68,30 @@ export default function App() {
           }
         />
         <Route path="catalog" element={<Navigate to="/catalog/find" replace />} />
-        <Route path="category/find" element={<FindCategoryPage />} />
-        <Route
-          path="category/create"
-          element={
-            <RequireRoles roles={WRITE_ROLES}>
-              <CategoryFormPage />
-            </RequireRoles>
-          }
-        />
-        <Route
-          path="category/edit/:productCategoryId"
-          element={
-            <RequireRoles roles={WRITE_ROLES}>
-              <CategoryFormPage />
-            </RequireRoles>
-          }
-        />
-        <Route path="category" element={<Navigate to="/category/find" replace />} />
+
+        <Route path="category" element={<CategoryLayout />}>
+          <Route index element={<Navigate to="/category/find" replace />} />
+          <Route path="find" element={<FindCategoryPage />} />
+          <Route path="rollup" element={<CategoryRollupPage />} />
+          <Route path="products" element={<CategoryProductsPage />} />
+          <Route path="catalogs" element={<CategoryCatalogsPage />} />
+          <Route
+            path="create"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <CategoryFormPage />
+              </RequireRoles>
+            }
+          />
+          <Route
+            path="edit/:productCategoryId"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <CategoryFormPage />
+              </RequireRoles>
+            }
+          />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

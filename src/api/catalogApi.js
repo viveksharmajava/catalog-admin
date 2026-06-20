@@ -139,3 +139,107 @@ export function updateProdCatalog(prodCatalogId, payload) {
     body: JSON.stringify(payload),
   });
 }
+
+function categoryPath(categoryId, suffix) {
+  return `/catalog/categories/${encodeURIComponent(categoryId)}${suffix}`;
+}
+
+export function fetchParentRollups(categoryId) {
+  return request(categoryPath(categoryId, '/rollups/parents'));
+}
+
+export function fetchChildRollups(categoryId) {
+  return request(categoryPath(categoryId, '/rollups/children'));
+}
+
+export function addParentRollup(categoryId, payload) {
+  return request(categoryPath(categoryId, '/rollups/parents'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function addChildRollup(categoryId, payload) {
+  return request(categoryPath(categoryId, '/rollups/children'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateRollup(payload) {
+  const categoryId = payload.productCategoryId;
+  return request(categoryPath(categoryId, '/rollups'), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeRollup(payload) {
+  const categoryId = payload.productCategoryId;
+  return request(categoryPath(categoryId, '/rollups'), {
+    method: 'DELETE',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchCategoryProducts(categoryId) {
+  return request(categoryPath(categoryId, '/products'));
+}
+
+export function addCategoryProduct(categoryId, payload) {
+  return request(categoryPath(categoryId, '/products'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCategoryProduct(payload) {
+  return request(categoryPath(payload.productCategoryId, '/products'), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeCategoryProduct(payload) {
+  return request(categoryPath(payload.productCategoryId, '/products'), {
+    method: 'DELETE',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchCategoryProdCatalogs(categoryId) {
+  return request(categoryPath(categoryId, '/prod-catalogs'));
+}
+
+export function addCategoryProdCatalog(categoryId, payload) {
+  return request(categoryPath(categoryId, '/prod-catalogs'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCategoryProdCatalog(payload) {
+  return request(categoryPath(payload.productCategoryId, '/prod-catalogs'), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeCategoryProdCatalog(payload) {
+  return request(categoryPath(payload.productCategoryId, '/prod-catalogs'), {
+    method: 'DELETE',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchProdCatalogCategoryTypes() {
+  return request('/catalog/reference/prod-catalog-category-types');
+}
+
+export function listAllProdCatalogs() {
+  return findProdCatalogs({ noConditionFind: true, page: 0, size: 100 });
+}
+
+export function listAllProducts() {
+  return findProducts({ noConditionFind: true, page: 0, size: 100 });
+}
