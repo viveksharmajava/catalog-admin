@@ -89,6 +89,81 @@ export default function FindProductPage() {
     runSearch(nextPage);
   }
 
+  function handlePageSizeChange(nextSize) {
+    const nextForm = { ...form, size: Number(nextSize) };
+    setForm(nextForm);
+    runSearch(0, nextForm);
+  }
+
+  function ResultsPagination() {
+    if (!results) return null;
+
+    const totalPages = Math.max(results.totalPages, 1);
+    const onFirstPage = page <= 0;
+    const onLastPage = page >= totalPages - 1;
+
+    return (
+      <nav className="results-pagination" aria-label="Search results pagination">
+        <span className="results-count">
+          {results.totalElements} result{results.totalElements === 1 ? '' : 's'} found
+        </span>
+        <ul className="pagination-nav">
+          <li>
+            <button type="button" className="pagination-link" disabled={onFirstPage} onClick={() => goToPage(0)}>
+              First
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="pagination-link"
+              disabled={onFirstPage}
+              onClick={() => goToPage(page - 1)}
+            >
+              Previous
+            </button>
+          </li>
+          <li className="pagination-status">
+            Page {page + 1} of {totalPages}
+          </li>
+          <li>
+            <button
+              type="button"
+              className="pagination-link"
+              disabled={onLastPage}
+              onClick={() => goToPage(page + 1)}
+            >
+              Next
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="pagination-link"
+              disabled={onLastPage}
+              onClick={() => goToPage(totalPages - 1)}
+            >
+              Last
+            </button>
+          </li>
+          <li className="pagination-pagesize">
+            <label htmlFor="results-page-size">View</label>
+            <select
+              id="results-page-size"
+              value={form.size}
+              onChange={(e) => handlePageSizeChange(e.target.value)}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </li>
+        </ul>
+      </nav>
+    );
+  }
+
   return (
     <div>
       <div className="screenlet">
@@ -124,20 +199,6 @@ export default function FindProductPage() {
                 List all products when no search criteria entered (OFBiz noConditionFind)
               </label>
             </div>
-            <div className="form-grid" style={{ marginTop: '1rem' }}>
-              <div className="form-field">
-                <label>Page Size</label>
-                <select
-                  value={form.size}
-                  onChange={(e) => setForm((prev) => ({ ...prev, size: Number(e.target.value) }))}
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </div>
-            </div>
             <div className="form-actions">
               <button className="btn-primary" type="submit" disabled={loading}>
                 {loading ? 'Searching…' : 'Find'}
@@ -160,10 +221,9 @@ export default function FindProductPage() {
 
       {results && (
         <div className="screenlet">
-          <div className="screenlet-title">
-            Products ({results.totalElements} found)
-          </div>
+          <div className="screenlet-title">Products</div>
           <div className="screenlet-body table-scroll">
+            <ResultsPagination />
             <table className="data-table">
               <thead>
                 <tr>
@@ -200,36 +260,7 @@ export default function FindProductPage() {
                 )}
               </tbody>
             </table>
-
-            {results.totalPages > 1 && (
-              <div className="pagination">
-                <button type="button" className="btn-secondary" disabled={page <= 0} onClick={() => goToPage(0)}>
-                  First
-                </button>
-                <button type="button" className="btn-secondary" disabled={page <= 0} onClick={() => goToPage(page - 1)}>
-                  Previous
-                </button>
-                <span>
-                  Page {page + 1} of {results.totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  disabled={page >= results.totalPages - 1}
-                  onClick={() => goToPage(page + 1)}
-                >
-                  Next
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  disabled={page >= results.totalPages - 1}
-                  onClick={() => goToPage(results.totalPages - 1)}
-                >
-                  Last
-                </button>
-              </div>
-            )}
+            <ResultsPagination />
           </div>
         </div>
       )}
