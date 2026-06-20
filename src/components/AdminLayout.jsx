@@ -19,6 +19,7 @@ export default function AdminLayout() {
       <div className="layout-body">
         <aside className="sidebar">
           <nav>
+            <NavLink to="/products/find">Find Product</NavLink>
             <NavLink to="/products/create">Create Product</NavLink>
           </nav>
         </aside>
