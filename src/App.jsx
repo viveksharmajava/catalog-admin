@@ -6,9 +6,10 @@ import AdminLayout from './components/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import ProductFormPage from './pages/ProductFormPage';
 import CatalogFormPage from './pages/CatalogFormPage';
+import CategoryFormPage from './pages/CategoryFormPage';
 import FindProductPage from './pages/FindProductPage';
 import FindCatalogPage from './pages/FindCatalogPage';
-import PlaceholderPage from './pages/PlaceholderPage';
+import FindCategoryPage from './pages/FindCategoryPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
 const READ_ROLES = ['ADMIN', 'CATALOG_MANAGER', 'MERCHANDISER', 'VIEWER'];
@@ -63,15 +64,24 @@ export default function App() {
           }
         />
         <Route path="catalog" element={<Navigate to="/catalog/find" replace />} />
+        <Route path="category/find" element={<FindCategoryPage />} />
         <Route
-          path="category"
+          path="category/create"
           element={
-            <PlaceholderPage
-              title="Category"
-              description="Category management screens will be available here."
-            />
+            <RequireRoles roles={WRITE_ROLES}>
+              <CategoryFormPage />
+            </RequireRoles>
           }
         />
+        <Route
+          path="category/edit/:productCategoryId"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <CategoryFormPage />
+            </RequireRoles>
+          }
+        />
+        <Route path="category" element={<Navigate to="/category/find" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -57,6 +57,35 @@ export function fetchCategories() {
   return request('/catalog/reference/categories');
 }
 
+export function fetchCategoryTypes() {
+  return request('/catalog/reference/category-types');
+}
+
+export function fetchCategory(categoryId) {
+  return request(`/catalog/categories/${encodeURIComponent(categoryId)}`);
+}
+
+export function createCategory(payload) {
+  return request('/catalog/categories', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCategory(categoryId, payload) {
+  return request(`/catalog/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function findCategories(payload) {
+  return request('/catalog/categories/find', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export function fetchProductStatuses() {
   return request('/catalog/reference/product-statuses');
 }

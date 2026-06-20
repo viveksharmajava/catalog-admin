@@ -24,7 +24,7 @@ export default function AdminLayout() {
             <NavLink to="/catalog/find" className={menuClass(catalogActive)}>
               Catalog
             </NavLink>
-            <NavLink to="/category" className={menuClass(categoryActive)}>
+            <NavLink to="/category/find" className={menuClass(categoryActive)}>
               Category
             </NavLink>
           </nav>
