@@ -25,6 +25,10 @@ export const initialProductForm = {
   productWidth: '',
   productDepth: '',
   keywords: '',
+  smallImageUrl: '',
+  mediumImageUrl: '',
+  largeImageUrl: '',
+  detailImageUrl: '',
 };
 
 function formatDateForInput(value) {
@@ -60,6 +64,10 @@ export function productDtoToForm(dto) {
     productWidth: dto.productWidth != null ? String(dto.productWidth) : '',
     productDepth: dto.productDepth != null ? String(dto.productDepth) : '',
     keywords: (dto.keywords || []).join(', '),
+    smallImageUrl: dto.smallImageUrl || '',
+    mediumImageUrl: dto.mediumImageUrl || '',
+    largeImageUrl: dto.largeImageUrl || '',
+    detailImageUrl: dto.detailImageUrl || '',
   };
 }
 
@@ -94,6 +102,10 @@ export function productFormToPayload(form, isEdit = false) {
     keywords: form.keywords
       ? form.keywords.split(',').map((k) => k.trim()).filter(Boolean)
       : [],
+    smallImageUrl: form.smallImageUrl || undefined,
+    mediumImageUrl: form.mediumImageUrl || undefined,
+    largeImageUrl: form.largeImageUrl || undefined,
+    detailImageUrl: form.detailImageUrl || undefined,
   };
 
   if (!isEdit) {

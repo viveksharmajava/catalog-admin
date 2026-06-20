@@ -178,7 +178,7 @@ export default function CategoryProductsPage() {
                         <tr key={key}>
                           <td>
                             <Link
-                              to={`/products/edit/${encodeURIComponent(row.productId)}`}
+                              to={`/products/${encodeURIComponent(row.productId)}/product`}
                               className="entity-link"
                             >
                               {row.internalName || row.productName || row.productId} [{row.productId}]

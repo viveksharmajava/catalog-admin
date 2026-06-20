@@ -263,16 +263,12 @@ export default function FindProductPage() {
                   results.content.map((row) => (
                     <tr key={row.productId}>
                       <td>
-                        {canAccess(WRITE_ROLES) ? (
-                          <Link
-                            to={`/products/edit/${encodeURIComponent(row.productId)}`}
-                            className="entity-link"
-                          >
-                            {row.productId}
-                          </Link>
-                        ) : (
-                          <strong>{row.productId}</strong>
-                        )}
+                        <Link
+                          to={`/products/${encodeURIComponent(row.productId)}/product`}
+                          className="entity-link"
+                        >
+                          {row.productId}
+                        </Link>
                       </td>
                       <td>{row.productTypeId}</td>
                       <td>{row.internalName}</td>

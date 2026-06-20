@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useMatch } from 'react-router-dom';
 import CollapsibleSection from '../components/CollapsibleSection';
 import FormField from '../components/FormField';
+import { useAuth } from '../auth/AuthContext';
 import {
   createProduct,
   fetchCategories,
@@ -16,9 +17,14 @@ import {
   productFormToPayload,
 } from '../utils/productForm';
 
+const WRITE_ROLES = ['ADMIN', 'CATALOG_MANAGER', 'MERCHANDISER'];
+
 export default function ProductFormPage() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { canAccess } = useAuth();
+  const inProductScope = Boolean(useMatch('/products/:productId/product'));
+  const canWrite = canAccess(WRITE_ROLES);
   const isEdit = Boolean(productId);
 
   const [form, setForm] = useState(initialProductForm);
@@ -75,6 +81,7 @@ export default function ProductFormPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (isEdit && !canWrite) return;
     setError('');
     setSuccess('');
 
@@ -91,7 +98,7 @@ export default function ProductFormPage() {
       } else {
         const created = await createProduct(productFormToPayload(form, false));
         setSuccess(`Product created: ${created.productId} (${created.productName})`);
-        setForm(initialProductForm);
+        navigate(`/products/${encodeURIComponent(created.productId)}/product`);
       }
     } catch (err) {
       setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} product`);
@@ -107,14 +114,18 @@ export default function ProductFormPage() {
       <div className="screenlet">
         <div className="screenlet-title screenlet-title-bar">
           <span>{isEdit ? 'Edit Product' : 'Create Product'}</span>
-          <Link to="/products/find" className="add-product-link">
-            Back to Find Product
-          </Link>
+          {!inProductScope && (
+            <Link to="/products/find" className="add-product-link">
+              Back to Find Product
+            </Link>
+          )}
         </div>
         <div className="screenlet-body">
           <p>
             {isEdit
-              ? 'Update product details. Product ID cannot be changed.'
+              ? canWrite
+                ? 'Update product details. Product ID cannot be changed.'
+                : 'View product details (read-only).'
               : 'OFBiz-inspired product create form for the catalog microservice.'}
           </p>
           {error && <div className="alert alert-error">{error}</div>}
@@ -123,6 +134,7 @@ export default function ProductFormPage() {
             <p>{loadingProduct ? 'Loading product…' : 'Loading reference data…'}</p>
           ) : (
             <form onSubmit={handleSubmit}>
+              <fieldset disabled={isEdit && !canWrite} className={isEdit && !canWrite ? 'readonly-form' : undefined}>
               <CollapsibleSection title="Identification" defaultOpen>
                 <div className="form-grid">
                   <FormField
@@ -357,15 +369,19 @@ export default function ProductFormPage() {
                 </div>
               </CollapsibleSection>
 
+              </fieldset>
+
               <div className="form-actions">
-                <button className="btn-primary" type="submit" disabled={submitting}>
-                  {submitting ? (isEdit ? 'Updating…' : 'Creating…') : isEdit ? 'Update Product' : 'Create Product'}
-                </button>
-                {isEdit ? (
+                {(!isEdit || canWrite) && (
+                  <button className="btn-primary" type="submit" disabled={submitting}>
+                    {submitting ? (isEdit ? 'Updating…' : 'Creating…') : isEdit ? 'Update Product' : 'Create Product'}
+                  </button>
+                )}
+                {!inProductScope && isEdit && canWrite ? (
                   <button className="btn-secondary" type="button" onClick={() => navigate('/products/find')}>
                     Cancel
                   </button>
-                ) : (
+                ) : !isEdit ? (
                   <button
                     className="btn-secondary"
                     type="button"
@@ -377,7 +393,7 @@ export default function ProductFormPage() {
                   >
                     Reset
                   </button>
-                )}
+                ) : null}
               </div>
             </form>
           )}

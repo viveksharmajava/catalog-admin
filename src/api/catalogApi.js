@@ -243,3 +243,30 @@ export function listAllProdCatalogs() {
 export function listAllProducts() {
   return findProducts({ noConditionFind: true, page: 0, size: 100 });
 }
+
+function productPath(productId, suffix = '') {
+  return `/catalog/products/${encodeURIComponent(productId)}${suffix}`;
+}
+
+export function fetchProductCategories(productId) {
+  return request(productPath(productId, '/categories'));
+}
+
+export function addProductCategory(productId, categoryId) {
+  return request(productPath(productId, `/categories/${encodeURIComponent(categoryId)}`), {
+    method: 'POST',
+  });
+}
+
+export function removeProductCategory(productId, categoryId) {
+  return request(productPath(productId, `/categories/${encodeURIComponent(categoryId)}`), {
+    method: 'DELETE',
+  });
+}
+
+export function addProductAttribute(productId, payload) {
+  return request(productPath(productId, '/attributes'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
