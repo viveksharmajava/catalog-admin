@@ -11,6 +11,7 @@ export default function AdminLayout() {
   const productsActive = location.pathname.startsWith('/products');
   const catalogActive = location.pathname.startsWith('/catalog');
   const categoryActive = location.pathname.startsWith('/category');
+  const storesActive = location.pathname.startsWith('/stores');
 
   return (
     <div className="app-shell">
@@ -26,6 +27,9 @@ export default function AdminLayout() {
             </NavLink>
             <NavLink to="/category/find" className={menuClass(categoryActive)}>
               Category
+            </NavLink>
+            <NavLink to="/stores" className={menuClass(storesActive)}>
+              Stores
             </NavLink>
           </nav>
         </div>

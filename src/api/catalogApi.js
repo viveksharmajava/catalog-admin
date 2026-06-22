@@ -1,4 +1,5 @@
 import { getStoredAuth } from '../auth/authStorage';
+import { handleUnauthorizedResponse } from '../auth/handleUnauthorized';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
@@ -19,6 +20,9 @@ async function request(path, options = {}) {
   });
 
   if (response.status === 401 || response.status === 403) {
+    if (!options.skipAuthRedirect) {
+      handleUnauthorizedResponse();
+    }
     const error = new Error('Unauthorized');
     error.status = response.status;
     throw error;
@@ -46,6 +50,7 @@ export function login(username, password) {
   return request('/catalog/auth/login', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
+    skipAuthRedirect: true,
   });
 }
 
@@ -88,6 +93,14 @@ export function findCategories(payload) {
 
 export function fetchProductStatuses() {
   return request('/catalog/reference/product-statuses');
+}
+
+export function fetchPriceTypes() {
+  return request('/catalog/reference/price-types');
+}
+
+export function fetchPricePurposes() {
+  return request('/catalog/reference/price-purposes');
 }
 
 export function createProduct(payload) {
@@ -138,6 +151,54 @@ export function updateProdCatalog(prodCatalogId, payload) {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
+}
+
+function catalogPath(prodCatalogId, suffix) {
+  return `/catalog/prod-catalogs/${encodeURIComponent(prodCatalogId)}${suffix}`;
+}
+
+export function fetchCatalogCategories(prodCatalogId) {
+  return request(catalogPath(prodCatalogId, '/categories'));
+}
+
+export function addCatalogCategory(prodCatalogId, payload) {
+  return request(catalogPath(prodCatalogId, '/categories'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCatalogCategory(prodCatalogId, payload) {
+  return request(catalogPath(prodCatalogId, '/categories'), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeCatalogCategory(prodCatalogId, payload) {
+  return request(catalogPath(prodCatalogId, '/categories'), {
+    method: 'DELETE',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchCatalogStores(prodCatalogId) {
+  return request(catalogPath(prodCatalogId, '/stores'));
+}
+
+export function addCatalogStore(prodCatalogId, payload) {
+  return request(catalogPath(prodCatalogId, '/stores'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeCatalogStore(prodCatalogId, productStoreId, fromDate) {
+  const params = new URLSearchParams({ fromDate: String(fromDate) });
+  return request(
+    `${catalogPath(prodCatalogId)}/stores/${encodeURIComponent(productStoreId)}?${params.toString()}`,
+    { method: 'DELETE' },
+  );
 }
 
 function categoryPath(categoryId, suffix) {
@@ -269,4 +330,110 @@ export function addProductAttribute(productId, payload) {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export function fetchProductImages(productId) {
+  return request(productPath(productId, '/images'));
+}
+
+export async function uploadProductImage(productId, size, file) {
+  const auth = getStoredAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(
+    `${API_BASE}/catalog/products/${encodeURIComponent(productId)}/images/${encodeURIComponent(size)}`,
+    {
+      method: 'POST',
+      headers,
+      body: formData,
+    },
+  );
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    const error = new Error('Unauthorized');
+    error.status = response.status;
+    throw error;
+  }
+
+  if (!response.ok) {
+    let message = `Upload failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+      else if (body.message) message = body.message;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+/** Use Vite proxy for locally served catalog images when possible. */
+export function resolveProductImageSrc(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.pathname.startsWith('/catalog/product-images/')) {
+      return parsed.pathname;
+    }
+  } catch {
+    if (url.startsWith('/catalog/product-images/')) {
+      return url;
+    }
+  }
+  return url;
+}
+
+function storePath(productStoreId, suffix = '') {
+  return `/catalog/product-stores/${encodeURIComponent(productStoreId)}${suffix}`;
+}
+
+export function listProductStores() {
+  return request('/catalog/product-stores');
+}
+
+export function fetchProductStore(productStoreId) {
+  return request(storePath(productStoreId));
+}
+
+export function createProductStore(payload) {
+  return request('/catalog/product-stores', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateProductStore(productStoreId, payload) {
+  return request(storePath(productStoreId), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchStoreCatalogs(productStoreId) {
+  return request(storePath(productStoreId, '/catalogs'));
+}
+
+export function addStoreCatalog(productStoreId, payload) {
+  return request(storePath(productStoreId, '/catalogs'), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeStoreCatalog(productStoreId, prodCatalogId, fromDate) {
+  const params = new URLSearchParams({ fromDate: String(fromDate) });
+  return request(
+    `${storePath(productStoreId)}/catalogs/${encodeURIComponent(prodCatalogId)}?${params.toString()}`,
+    { method: 'DELETE' },
+  );
 }

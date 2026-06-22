@@ -253,16 +253,12 @@ export default function FindCatalogPage() {
                   results.content.map((row) => (
                     <tr key={row.prodCatalogId}>
                       <td>
-                        {canAccess(WRITE_ROLES) ? (
-                          <Link
-                            to={`/catalog/edit/${encodeURIComponent(row.prodCatalogId)}`}
-                            className="entity-link"
-                          >
-                            {row.prodCatalogId}
-                          </Link>
-                        ) : (
-                          <strong>{row.prodCatalogId}</strong>
-                        )}
+                        <Link
+                          to={`/catalog/${encodeURIComponent(row.prodCatalogId)}/categories`}
+                          className="entity-link"
+                        >
+                          {row.prodCatalogId}
+                        </Link>
                       </td>
                       <td>{row.catalogName}</td>
                       <td>{row.useQuickAdd === 'Y' ? 'Yes' : 'No'}</td>

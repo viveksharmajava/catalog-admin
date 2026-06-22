@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const returnTo = location.state?.from || searchParams.get('returnTo') || '/products/create';
+
   if (isAuthenticated) {
-    return <Navigate to={location.state?.from || '/products/create'} replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   async function handleSubmit(event) {
@@ -21,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(username, password);
-      navigate(location.state?.from || '/products/create', { replace: true });
+      navigate(returnTo, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {

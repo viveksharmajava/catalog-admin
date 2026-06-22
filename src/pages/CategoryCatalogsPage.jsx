@@ -175,7 +175,7 @@ export default function CategoryCatalogsPage() {
                         <tr key={key}>
                           <td>
                             <Link
-                              to={`/catalog/edit/${encodeURIComponent(row.prodCatalogId)}`}
+                              to={`/catalog/${encodeURIComponent(row.prodCatalogId)}/categories`}
                               className="entity-link"
                             >
                               {row.catalogName || row.prodCatalogId} [{row.prodCatalogId}]
