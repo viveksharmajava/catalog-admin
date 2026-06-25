@@ -169,18 +169,31 @@ textarea {
   margin-bottom: 1rem;
 }
 
-.screenlet-title {
-  background: var(--emerald-700);
-  color: var(--white);
-  padding: 0.75rem 1rem;
-  font-weight: 700;
-}
-
 .screenlet-title-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.title-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.title-bar-actions .add-product-link {
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.screenlet-title {
+  background: var(--emerald-700);
+  color: var(--white);
+  padding: 0.75rem 1rem;
+  font-weight: 700;
 }
 
 .screenlet-body {

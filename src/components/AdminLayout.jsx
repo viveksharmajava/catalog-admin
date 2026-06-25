@@ -12,6 +12,7 @@ export default function AdminLayout() {
   const catalogActive = location.pathname.startsWith('/catalog');
   const categoryActive = location.pathname.startsWith('/category');
   const storesActive = location.pathname.startsWith('/stores');
+  const partyActive = location.pathname.startsWith('/party');
 
   return (
     <div className="app-shell">
@@ -30,6 +31,9 @@ export default function AdminLayout() {
             </NavLink>
             <NavLink to="/stores" className={menuClass(storesActive)}>
               Stores
+            </NavLink>
+            <NavLink to="/party/person/find" className={menuClass(partyActive)}>
+              Party
             </NavLink>
           </nav>
         </div>

@@ -67,7 +67,8 @@ export default function LoginPage() {
           </div>
         </form>
         <p className="hint" style={{ marginTop: '1rem' }}>
-          Dev users: admin / admin123 (ADMIN), catalog_mgr / catalog123 (CATALOG_MANAGER)
+          Sign in with a party user login. Default admin: admin / admin123 (FULLADMIN security group).
+          New users need a security group with OFBTOOLS_VIEW to access this UI.
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { findProducts } from '../api/catalogApi';
+import { findProducts, downloadProductExport } from '../api/catalogApi';
 import { useAuth } from '../auth/AuthContext';
 import SearchCriteriaField from '../components/SearchCriteriaField';
 
@@ -175,12 +175,24 @@ export default function FindProductPage() {
         <div className="screenlet-title screenlet-title-bar">
           <span>Find Product</span>
           {canAccess(WRITE_ROLES) && (
-            <Link to="/products/create" className="add-product-link">
-              <span className="add-product-icon" aria-hidden="true">
-                +
-              </span>
-              Add Product
-            </Link>
+            <div className="title-bar-actions">
+              <Link to="/products/import" className="add-product-link">
+                Bulk Import
+              </Link>
+              <button
+                type="button"
+                className="add-product-link"
+                onClick={() => downloadProductExport().catch((err) => setError(err.message))}
+              >
+                Export
+              </button>
+              <Link to="/products/create" className="add-product-link">
+                <span className="add-product-icon" aria-hidden="true">
+                  +
+                </span>
+                Add Product
+              </Link>
+            </div>
           )}
         </div>
         <div className="screenlet-body">

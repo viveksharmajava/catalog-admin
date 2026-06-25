@@ -128,6 +128,89 @@ export function findProducts(payload) {
   });
 }
 
+async function downloadFile(path, defaultFilename) {
+  const auth = getStoredAuth();
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, { headers });
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    throw new Error('Unauthorized');
+  }
+
+  if (!response.ok) {
+    let message = `Download failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  const filename = match ? match[1] : defaultFilename;
+
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+export function downloadProductImportTemplate() {
+  return downloadFile('/catalog/products/import/template', 'product_import_template.xlsx');
+}
+
+export function downloadProductExport() {
+  return downloadFile('/catalog/products/export', 'products_export.xlsx');
+}
+
+export async function importProducts(file) {
+  const auth = getStoredAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(`${API_BASE}/catalog/products/import`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    throw new Error('Unauthorized');
+  }
+
+  if (!response.ok) {
+    let message = `Import failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 export function findProdCatalogs(payload) {
   return request('/catalog/prod-catalogs/find', {
     method: 'POST',

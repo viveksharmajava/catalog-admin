@@ -10,6 +10,8 @@ import AdminLayout from './components/AdminLayout';
 
 import CategoryLayout from './components/CategoryLayout';
 
+import CatalogScopeLayout from './components/CatalogScopeLayout';
+
 import ProductScopeLayout from './components/ProductScopeLayout';
 
 import LoginPage from './pages/LoginPage';
@@ -18,9 +20,15 @@ import ProductFormPage from './pages/ProductFormPage';
 
 import CatalogFormPage from './pages/CatalogFormPage';
 
+import CatalogCategoriesPage from './pages/CatalogCategoriesPage';
+
+import CatalogStoresPage from './pages/CatalogStoresPage';
+
 import CategoryFormPage from './pages/CategoryFormPage';
 
 import FindProductPage from './pages/FindProductPage';
+
+import ProductImportPage from './pages/ProductImportPage';
 
 import FindCatalogPage from './pages/FindCatalogPage';
 
@@ -39,6 +47,22 @@ import ProductAttributesPage from './pages/ProductAttributesPage';
 import ProductImagesPage from './pages/ProductImagesPage';
 
 import ProductPricesPage from './pages/ProductPricesPage';
+
+import ListStoresPage from './pages/ListStoresPage';
+
+import StoreFormPage from './pages/StoreFormPage';
+
+import FindPartyPage from './pages/FindPartyPage';
+
+import PartyFormPage from './pages/PartyFormPage';
+
+import PartyLayout from './components/PartyLayout';
+
+import FindSecurityGroupPage from './pages/FindSecurityGroupPage';
+
+import SecurityGroupFormPage from './pages/SecurityGroupFormPage';
+
+import FindPermissionPage from './pages/FindPermissionPage';
 
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
@@ -79,6 +103,15 @@ export default function App() {
         <Route index element={<Navigate to="/products/find" replace />} />
 
         <Route path="products/find" element={<FindProductPage />} />
+
+        <Route
+          path="products/import"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <ProductImportPage />
+            </RequireRoles>
+          }
+        />
 
         <Route
 
@@ -142,21 +175,58 @@ export default function App() {
 
           path="catalog/edit/:prodCatalogId"
 
-          element={
-
-            <RequireRoles roles={WRITE_ROLES}>
-
-              <CatalogFormPage />
-
-            </RequireRoles>
-
-          }
+          element={<LegacyCatalogEditRedirect />}
 
         />
 
+        <Route path="catalog/:prodCatalogId" element={<CatalogScopeLayout />}>
+
+          <Route index element={<Navigate to="categories" replace />} />
+
+          <Route path="categories" element={<CatalogCategoriesPage />} />
+
+          <Route path="stores" element={<CatalogStoresPage />} />
+
+        </Route>
+
         <Route path="catalog" element={<Navigate to="/catalog/find" replace />} />
 
+        <Route path="stores" element={<ListStoresPage />} />
 
+        <Route
+          path="stores/create"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <StoreFormPage />
+            </RequireRoles>
+          }
+        />
+
+        <Route path="stores/edit/:productStoreId" element={<StoreFormPage />} />
+
+        <Route path="party/find" element={<LegacyPartyFindRedirect />} />
+        <Route path="party/create" element={<LegacyPartyCreateRedirect />} />
+        <Route path="party/edit/:partyId" element={<LegacyPartyEditRedirect />} />
+
+        <Route path="party" element={<PartyLayout />}>
+          <Route index element={<Navigate to="/party/person/find" replace />} />
+
+          <Route path="person/find" element={<FindPartyPage />} />
+          <Route
+            path="person/create"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <PartyFormPage />
+              </RequireRoles>
+            }
+          />
+          <Route path="person/edit/:partyId" element={<PartyFormPage />} />
+
+          <Route path="security-group/find" element={<FindSecurityGroupPage />} />
+          <Route path="security-group/edit/:groupId" element={<SecurityGroupFormPage />} />
+
+          <Route path="permission/find" element={<FindPermissionPage />} />
+        </Route>
 
         <Route path="category" element={<CategoryLayout />}>
 
@@ -219,5 +289,23 @@ export default function App() {
 function LegacyProductEditRedirect() {
   const { productId } = useParams();
   return <Navigate to={`/products/${encodeURIComponent(productId)}/product`} replace />;
+}
+
+function LegacyCatalogEditRedirect() {
+  const { prodCatalogId } = useParams();
+  return <Navigate to={`/catalog/${encodeURIComponent(prodCatalogId)}/categories`} replace />;
+}
+
+function LegacyPartyFindRedirect() {
+  return <Navigate to="/party/person/find" replace />;
+}
+
+function LegacyPartyCreateRedirect() {
+  return <Navigate to="/party/person/create" replace />;
+}
+
+function LegacyPartyEditRedirect() {
+  const { partyId } = useParams();
+  return <Navigate to={`/party/person/edit/${encodeURIComponent(partyId)}`} replace />;
 }
 
