@@ -10,7 +10,7 @@ import {
   updateRollup,
 } from '../api/catalogApi';
 import { useAuth } from '../auth/AuthContext';
-import CategoryScopePicker, { useCategoryScopeId } from '../components/CategoryScopePicker';
+import { useCategoryScopeId } from '../components/CategoryScopePicker';
 import FormField from '../components/FormField';
 import { emptyDateTimeLocal, formatDateTimeLocal, toApiDateTime } from '../utils/dateTime';
 
@@ -44,6 +44,10 @@ export default function CategoryRollupPage() {
   }, []);
 
   useEffect(() => {
+    setError('');
+    setSuccess('');
+    setAddParentForm({ parentProductCategoryId: '', fromDate: emptyDateTimeLocal(), sequenceNum: '1' });
+    setAddChildForm({ productCategoryId: '', fromDate: emptyDateTimeLocal(), sequenceNum: '1' });
     if (!categoryId) {
       setParents([]);
       setChildren([]);
@@ -140,17 +144,10 @@ export default function CategoryRollupPage() {
 
   return (
     <div>
-      <CategoryScopePicker categories={categories} />
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      {!categoryId ? (
-        <div className="screenlet">
-          <div className="screenlet-body">
-            <p>Select a category above to manage parent and child rollup mappings.</p>
-          </div>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <p>Loading rollups…</p>
       ) : (
         <>
@@ -302,7 +299,7 @@ function RollupTable({ title, emptyMessage, rows, idLabel, nameField, idField, c
                   <tr key={key}>
                     <td>
                       <Link
-                        to={`/category/edit/${encodeURIComponent(row[idField])}`}
+                        to={`/category/${encodeURIComponent(row[idField])}/category`}
                         className="entity-link"
                       >
                         {row[nameField] || row[idField]} [{row[idField]}]

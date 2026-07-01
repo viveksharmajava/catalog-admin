@@ -6,8 +6,10 @@ import {
   fetchCategory,
   fetchCategoryTypes,
   updateCategory,
+  uploadCategoryImage,
 } from '../api/catalogApi';
 import FormField from '../components/FormField';
+import EntityImageUpload from '../components/EntityImageUpload';
 import {
   categoryDtoToForm,
   categoryFormToPayload,
@@ -25,6 +27,7 @@ export default function CategoryFormPage() {
   const [loadingRefs, setLoadingRefs] = useState(true);
   const [loadingCategory, setLoadingCategory] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -46,6 +49,11 @@ export default function CategoryFormPage() {
   useEffect(() => {
     if (!isEdit || !productCategoryId) return;
 
+    setForm(initialCategoryForm);
+    setError('');
+    setSuccess('');
+    setImageFile(null);
+
     async function loadCategory() {
       setLoadingCategory(true);
       setError('');
@@ -65,6 +73,13 @@ export default function CategoryFormPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  async function uploadImageIfNeeded(categoryId) {
+    if (!imageFile || !categoryId) return;
+    const result = await uploadCategoryImage(categoryId, imageFile);
+    setForm((prev) => ({ ...prev, categoryImageUrl: result.url || '' }));
+    setImageFile(null);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError('');
@@ -79,11 +94,13 @@ export default function CategoryFormPage() {
     try {
       if (isEdit) {
         const updated = await updateCategory(productCategoryId, categoryFormToPayload(form, true));
+        await uploadImageIfNeeded(updated.productCategoryId);
         setSuccess(`Category "${updated.categoryName}" (${updated.productCategoryId}) updated successfully.`);
       } else {
         const created = await createCategory(categoryFormToPayload(form, false));
+        await uploadImageIfNeeded(created.productCategoryId);
         setSuccess(`Category "${created.categoryName}" (${created.productCategoryId}) created successfully.`);
-        setTimeout(() => navigate('/category/find'), 1200);
+        setTimeout(() => navigate(`/category/${created.productCategoryId}/category`), 1200);
       }
     } catch (err) {
       setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} category`);
@@ -183,14 +200,17 @@ export default function CategoryFormPage() {
                     rows={4}
                   />
                 </FormField>
-                <FormField label="Category Image URL" className="full-width">
-                  <input
-                    type="text"
-                    maxLength={2000}
-                    value={form.categoryImageUrl}
-                    onChange={(e) => updateField('categoryImageUrl', e.target.value)}
-                  />
-                </FormField>
+                <EntityImageUpload
+                  entityId={isEdit ? productCategoryId : undefined}
+                  imageUrl={form.categoryImageUrl}
+                  onImageUrlChange={(url) => updateField('categoryImageUrl', url)}
+                  uploadImage={uploadCategoryImage}
+                  pendingFile={imageFile}
+                  onPendingFileChange={setImageFile}
+                  uploadOnSubmit={!isEdit}
+                  label="Category Image"
+                  hint="Upload a category banner or thumbnail. On create, the image uploads when you save."
+                />
                 <FormField label="Show In Select" className="checkbox-row">
                   <input
                     type="checkbox"

@@ -1,12 +1,16 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 
-const items = [
-  { to: '/category/find', label: 'Find Category', end: true },
-  { to: '/category/import', label: 'Bulk Import', end: true },
-  { to: '/category/create', label: 'New Category', end: true },
-];
+export default function CategoryScopedSubNav() {
+  const { productCategoryId } = useParams();
+  const base = `/category/${encodeURIComponent(productCategoryId)}`;
 
-export default function CategorySubNav() {
+  const items = [
+    { to: `${base}/category`, label: 'Category', end: true },
+    { to: `${base}/rollup`, label: 'Rollup', end: true },
+    { to: `${base}/products`, label: 'Products', end: true },
+    { to: `${base}/catalogs`, label: 'Catalog', end: true },
+  ];
+
   return (
     <nav className="category-subnav" aria-label="Category section navigation">
       <ul>

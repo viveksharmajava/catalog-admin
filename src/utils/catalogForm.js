@@ -2,6 +2,7 @@ export const initialCatalogForm = {
   prodCatalogId: '',
   catalogName: '',
   useQuickAdd: 'Y',
+  isCartEnabled: true,
   styleSheet: '',
   headerLogo: '',
   contentPathPrefix: '',
@@ -15,6 +16,7 @@ export function catalogDtoToForm(dto) {
     prodCatalogId: dto.prodCatalogId || '',
     catalogName: dto.catalogName || '',
     useQuickAdd: dto.useQuickAdd || 'Y',
+    isCartEnabled: dto.isCartEnabled !== false,
     styleSheet: dto.styleSheet || '',
     headerLogo: dto.headerLogo || '',
     contentPathPrefix: dto.contentPathPrefix || '',
@@ -28,6 +30,7 @@ export function catalogFormToPayload(form, isEdit = false) {
   const payload = {
     catalogName: form.catalogName.trim(),
     useQuickAdd: form.useQuickAdd,
+    isCartEnabled: form.isCartEnabled === true || form.isCartEnabled === 'true',
     styleSheet: form.styleSheet.trim() || undefined,
     headerLogo: form.headerLogo.trim() || undefined,
     contentPathPrefix: form.contentPathPrefix.trim() || undefined,

@@ -18,6 +18,10 @@ export default defineConfig({
         target: 'http://localhost:8082',
         changeOrigin: true,
       },
+      '/orders': {
+        target: 'http://localhost:8083',
+        changeOrigin: true,
+      },
     },
   },
 });

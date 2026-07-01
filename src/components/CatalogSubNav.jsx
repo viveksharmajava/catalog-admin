@@ -5,6 +5,7 @@ export default function CatalogSubNav() {
   const base = `/catalog/${encodeURIComponent(prodCatalogId)}`;
 
   const items = [
+    { to: `${base}/catalog`, label: 'Catalog', end: true },
     { to: `${base}/categories`, label: 'Categories', end: true },
     { to: `${base}/stores`, label: 'Stores', end: true },
   ];

@@ -12,6 +12,7 @@ const columns = [
   { key: 'subtitle', label: 'Subtitle' },
   { key: 'companyName', label: 'Company' },
   { key: 'isDemoStore', label: 'Demo Store' },
+  { key: 'defaultStore', label: 'Default' },
 ];
 
 export default function ListStoresPage() {
@@ -81,7 +82,7 @@ export default function ListStoresPage() {
                       <tr key={row.productStoreId}>
                         <td>
                           <Link
-                            to={`/stores/edit/${encodeURIComponent(row.productStoreId)}`}
+                            to={`/stores/${encodeURIComponent(row.productStoreId)}/store`}
                             className="entity-link"
                           >
                             {row.productStoreId}
@@ -92,6 +93,7 @@ export default function ListStoresPage() {
                         <td>{row.subtitle}</td>
                         <td>{row.companyName}</td>
                         <td>{row.isDemoStore}</td>
+                        <td>{row.defaultStore ? 'Yes' : '—'}</td>
                       </tr>
                     ))
                   )}

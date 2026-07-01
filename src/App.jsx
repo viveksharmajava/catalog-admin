@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams, useSearchParams } from 'react-router-dom';
 
 
 
@@ -9,6 +9,8 @@ import RequireRoles from './auth/RequireRoles';
 import AdminLayout from './components/AdminLayout';
 
 import CategoryLayout from './components/CategoryLayout';
+
+import CategoryScopeLayout from './components/CategoryScopeLayout';
 
 import CatalogScopeLayout from './components/CatalogScopeLayout';
 
@@ -29,6 +31,10 @@ import CategoryFormPage from './pages/CategoryFormPage';
 import FindProductPage from './pages/FindProductPage';
 
 import ProductImportPage from './pages/ProductImportPage';
+
+import CategoryImportPage from './pages/CategoryImportPage';
+
+import CatalogImportPage from './pages/CatalogImportPage';
 
 import FindCatalogPage from './pages/FindCatalogPage';
 
@@ -52,17 +58,37 @@ import ListStoresPage from './pages/ListStoresPage';
 
 import StoreFormPage from './pages/StoreFormPage';
 
+import StoreScopeLayout from './components/StoreScopeLayout';
+
+import StoreSettingsPage from './pages/StoreSettingsPage';
+
 import FindPartyPage from './pages/FindPartyPage';
 
 import PartyFormPage from './pages/PartyFormPage';
 
+import PartyAddressesPage from './pages/PartyAddressesPage';
+
 import PartyLayout from './components/PartyLayout';
+
+import PartyScopeLayout from './components/PartyScopeLayout';
+
+import OrdersLayout from './components/OrdersLayout';
 
 import FindSecurityGroupPage from './pages/FindSecurityGroupPage';
 
 import SecurityGroupFormPage from './pages/SecurityGroupFormPage';
 
 import FindPermissionPage from './pages/FindPermissionPage';
+
+import FindOrdersPage from './pages/FindOrdersPage';
+
+import OrderFormPage from './pages/OrderFormPage';
+
+import FindQuotesPage from './pages/FindQuotesPage';
+
+import QuoteFormPage from './pages/QuoteFormPage';
+
+import CancelOrderPage from './pages/CancelOrderPage';
 
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
@@ -156,6 +182,15 @@ export default function App() {
         <Route path="catalog/find" element={<FindCatalogPage />} />
 
         <Route
+          path="catalog/import"
+          element={
+            <RequireRoles roles={WRITE_ROLES}>
+              <CatalogImportPage />
+            </RequireRoles>
+          }
+        />
+
+        <Route
 
           path="catalog/create"
 
@@ -181,7 +216,9 @@ export default function App() {
 
         <Route path="catalog/:prodCatalogId" element={<CatalogScopeLayout />}>
 
-          <Route index element={<Navigate to="categories" replace />} />
+          <Route index element={<Navigate to="catalog" replace />} />
+
+          <Route path="catalog" element={<CatalogFormPage />} />
 
           <Route path="categories" element={<CatalogCategoriesPage />} />
 
@@ -202,7 +239,13 @@ export default function App() {
           }
         />
 
-        <Route path="stores/edit/:productStoreId" element={<StoreFormPage />} />
+        <Route path="stores/edit/:productStoreId" element={<LegacyStoreEditRedirect />} />
+
+        <Route path="stores/:productStoreId" element={<StoreScopeLayout />}>
+          <Route index element={<Navigate to="store" replace />} />
+          <Route path="store" element={<StoreFormPage />} />
+          <Route path="settings" element={<StoreSettingsPage />} />
+        </Route>
 
         <Route path="party/find" element={<LegacyPartyFindRedirect />} />
         <Route path="party/create" element={<LegacyPartyCreateRedirect />} />
@@ -220,12 +263,50 @@ export default function App() {
               </RequireRoles>
             }
           />
-          <Route path="person/edit/:partyId" element={<PartyFormPage />} />
+          <Route path="person/edit/:partyId" element={<LegacyPartyPersonEditRedirect />} />
+
+          <Route path="person/:partyId" element={<PartyScopeLayout />}>
+            <Route index element={<Navigate to="person" replace />} />
+            <Route path="person" element={<PartyFormPage />} />
+            <Route path="addresses" element={<PartyAddressesPage />} />
+          </Route>
 
           <Route path="security-group/find" element={<FindSecurityGroupPage />} />
           <Route path="security-group/edit/:groupId" element={<SecurityGroupFormPage />} />
 
           <Route path="permission/find" element={<FindPermissionPage />} />
+        </Route>
+
+        <Route path="orders" element={<OrdersLayout />}>
+          <Route index element={<Navigate to="/orders/order/find" replace />} />
+
+          <Route path="order/find" element={<FindOrdersPage />} />
+          <Route
+            path="order/create"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <OrderFormPage />
+              </RequireRoles>
+            }
+          />
+          <Route
+            path="order/cancel"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <CancelOrderPage />
+              </RequireRoles>
+            }
+          />
+
+          <Route path="quote/find" element={<FindQuotesPage />} />
+          <Route
+            path="quote/create"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <QuoteFormPage />
+              </RequireRoles>
+            }
+          />
         </Route>
 
         <Route path="category" element={<CategoryLayout />}>
@@ -234,43 +315,39 @@ export default function App() {
 
           <Route path="find" element={<FindCategoryPage />} />
 
-          <Route path="rollup" element={<CategoryRollupPage />} />
+          <Route
+            path="import"
+            element={
+              <RequireRoles roles={WRITE_ROLES}>
+                <CategoryImportPage />
+              </RequireRoles>
+            }
+          />
 
-          <Route path="products" element={<CategoryProductsPage />} />
+          <Route path="rollup" element={<LegacyCategoryScopeRedirect segment="rollup" />} />
 
-          <Route path="catalogs" element={<CategoryCatalogsPage />} />
+          <Route path="products" element={<LegacyCategoryScopeRedirect segment="products" />} />
+
+          <Route path="catalogs" element={<LegacyCategoryScopeRedirect segment="catalogs" />} />
 
           <Route
-
             path="create"
-
             element={
-
               <RequireRoles roles={WRITE_ROLES}>
-
                 <CategoryFormPage />
-
               </RequireRoles>
-
             }
-
           />
 
-          <Route
+          <Route path="edit/:productCategoryId" element={<LegacyCategoryEditRedirect />} />
 
-            path="edit/:productCategoryId"
-
-            element={
-
-              <RequireRoles roles={WRITE_ROLES}>
-
-                <CategoryFormPage />
-
-              </RequireRoles>
-
-            }
-
-          />
+          <Route path=":productCategoryId" element={<CategoryScopeLayout />}>
+            <Route index element={<Navigate to="category" replace />} />
+            <Route path="category" element={<CategoryFormPage />} />
+            <Route path="rollup" element={<CategoryRollupPage />} />
+            <Route path="products" element={<CategoryProductsPage />} />
+            <Route path="catalogs" element={<CategoryCatalogsPage />} />
+          </Route>
 
         </Route>
 
@@ -286,6 +363,20 @@ export default function App() {
 
 
 
+function LegacyCategoryEditRedirect() {
+  const { productCategoryId } = useParams();
+  return <Navigate to={`/category/${encodeURIComponent(productCategoryId)}/category`} replace />;
+}
+
+function LegacyCategoryScopeRedirect({ segment }) {
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get('categoryId');
+  if (categoryId) {
+    return <Navigate to={`/category/${encodeURIComponent(categoryId)}/${segment}`} replace />;
+  }
+  return <Navigate to="/category/find" replace />;
+}
+
 function LegacyProductEditRedirect() {
   const { productId } = useParams();
   return <Navigate to={`/products/${encodeURIComponent(productId)}/product`} replace />;
@@ -293,7 +384,7 @@ function LegacyProductEditRedirect() {
 
 function LegacyCatalogEditRedirect() {
   const { prodCatalogId } = useParams();
-  return <Navigate to={`/catalog/${encodeURIComponent(prodCatalogId)}/categories`} replace />;
+  return <Navigate to={`/catalog/${encodeURIComponent(prodCatalogId)}/catalog`} replace />;
 }
 
 function LegacyPartyFindRedirect() {
@@ -306,6 +397,16 @@ function LegacyPartyCreateRedirect() {
 
 function LegacyPartyEditRedirect() {
   const { partyId } = useParams();
-  return <Navigate to={`/party/person/edit/${encodeURIComponent(partyId)}`} replace />;
+  return <Navigate to={`/party/person/${encodeURIComponent(partyId)}/person`} replace />;
+}
+
+function LegacyPartyPersonEditRedirect() {
+  const { partyId } = useParams();
+  return <Navigate to={`/party/person/${encodeURIComponent(partyId)}/person`} replace />;
+}
+
+function LegacyStoreEditRedirect() {
+  const { productStoreId } = useParams();
+  return <Navigate to={`/stores/${encodeURIComponent(productStoreId)}/store`} replace />;
 }
 

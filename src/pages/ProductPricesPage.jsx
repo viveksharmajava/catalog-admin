@@ -30,6 +30,40 @@ const emptyAddForm = {
   taxAuthGeoId: '',
 };
 
+function defaultAddForm(types, purposes, existingPrices = []) {
+  const productPricePurposeId = purposes.some((p) => p.id === 'PURCHASE')
+    ? 'PURCHASE'
+    : purposes[0]?.id || '';
+  const currencyUomId = 'INR';
+  const productStoreGroupId = '_NA_';
+
+  const usedTypeIds = new Set(
+    existingPrices
+      .filter(
+        (row) =>
+          row.productPricePurposeId === productPricePurposeId &&
+          row.currencyUomId === currencyUomId &&
+          row.productStoreGroupId === productStoreGroupId,
+      )
+      .map((row) => row.productPriceTypeId),
+  );
+
+  const preferredOrder = ['MAXIMUM_PRICE', 'LIST_PRICE', 'DEFAULT_PRICE', 'AVERAGE_COST'];
+  const productPriceTypeId =
+    preferredOrder.find((id) => types.some((t) => t.id === id) && !usedTypeIds.has(id)) ||
+    types.find((t) => !usedTypeIds.has(t.id))?.id ||
+    (types.some((t) => t.id === 'DEFAULT_PRICE') ? 'DEFAULT_PRICE' : types[0]?.id || '');
+
+  return {
+    ...emptyAddForm,
+    productPriceTypeId,
+    productPricePurposeId,
+    currencyUomId,
+    productStoreGroupId,
+    fromDate: emptyDateTimeLocal(),
+  };
+}
+
 function priceKey(row) {
   return `${row.productPriceTypeId}|${row.productPricePurposeId}|${row.currencyUomId}|${row.productStoreGroupId}|${row.fromDate}`;
 }
@@ -65,15 +99,7 @@ export default function ProductPricesPage() {
         ]);
         setPriceTypes(types);
         setPricePurposes(purposes);
-        setAddForm((form) => ({
-          ...form,
-          productPriceTypeId: types.some((t) => t.id === 'DEFAULT_PRICE')
-            ? 'DEFAULT_PRICE'
-            : types[0]?.id || '',
-          productPricePurposeId: purposes.some((p) => p.id === 'PURCHASE')
-            ? 'PURCHASE'
-            : purposes[0]?.id || '',
-        }));
+        setAddForm(defaultAddForm(types, purposes));
       } catch (err) {
         setError(err.message || 'Failed to load price type and purpose options');
       } finally {
@@ -127,7 +153,17 @@ export default function ProductPricesPage() {
         fromDate: toApiDateTime(addForm.fromDate),
       }));
       setSuccess('Product price created.');
-      setAddForm({ ...emptyAddForm, fromDate: emptyDateTimeLocal() });
+      setAddForm(
+        defaultAddForm(priceTypes, pricePurposes, [
+          ...prices,
+          {
+            productPriceTypeId: addForm.productPriceTypeId,
+            productPricePurposeId: addForm.productPricePurposeId,
+            currencyUomId: addForm.currencyUomId,
+            productStoreGroupId: addForm.productStoreGroupId || '_NA_',
+          },
+        ]),
+      );
       loadPrices();
     } catch (err) {
       setError(err.message || 'Failed to create price');

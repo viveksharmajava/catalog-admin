@@ -174,12 +174,17 @@ export default function FindCategoryPage() {
         <div className="screenlet-title screenlet-title-bar">
           <span>Find Category</span>
           {canAccess(WRITE_ROLES) && (
-            <Link to="/category/create" className="add-product-link">
-              <span className="add-product-icon" aria-hidden="true">
-                +
-              </span>
-              Add Category
-            </Link>
+            <div className="title-bar-actions">
+              <Link to="/category/import" className="add-product-link">
+                Bulk Import
+              </Link>
+              <Link to="/category/create" className="add-product-link">
+                <span className="add-product-icon" aria-hidden="true">
+                  +
+                </span>
+                Add Category
+              </Link>
+            </div>
           )}
         </div>
         <div className="screenlet-body">
@@ -259,7 +264,7 @@ export default function FindCategoryPage() {
                       <td>
                         {canAccess(WRITE_ROLES) ? (
                           <Link
-                            to={`/category/edit/${encodeURIComponent(row.productCategoryId)}`}
+                            to={`/category/${encodeURIComponent(row.productCategoryId)}/category`}
                             className="entity-link"
                           >
                             {row.productCategoryId}

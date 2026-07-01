@@ -130,7 +130,7 @@ export default function ProductCategoriesPage() {
                     <tr key={row.productCategoryId}>
                       <td>
                         <Link
-                          to={`/category/edit/${encodeURIComponent(row.productCategoryId)}`}
+                          to={`/category/${encodeURIComponent(row.productCategoryId)}/category`}
                           className="entity-link"
                         >
                           {row.productCategoryId}

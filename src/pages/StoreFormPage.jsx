@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useMatch } from 'react-router-dom';
 import {
   addStoreCatalog,
   createProductStore,
@@ -32,6 +32,7 @@ function YesNoSelect({ value, onChange, disabled }) {
 export default function StoreFormPage() {
   const { productStoreId } = useParams();
   const navigate = useNavigate();
+  const inStoreScope = Boolean(useMatch('/stores/:productStoreId/*'));
   const { canAccess } = useAuth();
   const canWrite = canAccess(WRITE_ROLES);
   const isEdit = Boolean(productStoreId);
@@ -94,7 +95,7 @@ export default function StoreFormPage() {
       } else {
         const created = await createProductStore(storeFormToPayload(form, false));
         setSuccess(`Store created: ${created.storeName} (${created.productStoreId})`);
-        setTimeout(() => navigate(`/stores/edit/${encodeURIComponent(created.productStoreId)}`), 1000);
+        setTimeout(() => navigate(`/stores/${encodeURIComponent(created.productStoreId)}/store`), 1000);
       }
     } catch (err) {
       setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} store`);
@@ -141,9 +142,19 @@ export default function StoreFormPage() {
       <div className="screenlet">
         <div className="screenlet-title screenlet-title-bar">
           <span>{isEdit ? 'Edit Product Store' : 'Create Product Store'}</span>
-          <Link to="/stores" className="add-product-link">
-            Back to Stores
-          </Link>
+          {!inStoreScope && (
+            <Link to="/stores" className="add-product-link">
+              Back to Stores
+            </Link>
+          )}
+          {isEdit && inStoreScope && (
+            <Link
+              to={`/stores/${encodeURIComponent(productStoreId)}/settings`}
+              className="add-product-link"
+            >
+              Store Settings
+            </Link>
+          )}
         </div>
         <div className="screenlet-body">
           <p>

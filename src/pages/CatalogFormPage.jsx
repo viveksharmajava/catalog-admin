@@ -4,8 +4,10 @@ import {
   createProdCatalog,
   fetchProdCatalog,
   updateProdCatalog,
+  uploadCatalogImage,
 } from '../api/catalogApi';
 import FormField from '../components/FormField';
+import EntityImageUpload from '../components/EntityImageUpload';
 import {
   catalogDtoToForm,
   catalogFormToPayload,
@@ -20,6 +22,7 @@ export default function CatalogFormPage() {
   const [form, setForm] = useState(initialCatalogForm);
   const [loadingCatalog, setLoadingCatalog] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -45,6 +48,13 @@ export default function CatalogFormPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  async function uploadImageIfNeeded(prodCatalogId) {
+    if (!imageFile || !prodCatalogId) return;
+    const result = await uploadCatalogImage(prodCatalogId, imageFile);
+    setForm((prev) => ({ ...prev, headerLogo: result.url || '' }));
+    setImageFile(null);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError('');
@@ -59,11 +69,13 @@ export default function CatalogFormPage() {
     try {
       if (isEdit) {
         const updated = await updateProdCatalog(prodCatalogId, catalogFormToPayload(form, true));
+        await uploadImageIfNeeded(updated.prodCatalogId);
         setSuccess(`Catalog "${updated.catalogName}" (${updated.prodCatalogId}) updated successfully.`);
       } else {
         const created = await createProdCatalog(catalogFormToPayload(form, false));
+        await uploadImageIfNeeded(created.prodCatalogId);
         setSuccess(`Catalog "${created.catalogName}" (${created.prodCatalogId}) created successfully.`);
-        setTimeout(() => navigate('/catalog/find'), 1200);
+        setTimeout(() => navigate(`/catalog/${encodeURIComponent(created.prodCatalogId)}/catalog`), 1200);
       }
     } catch (err) {
       setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} catalog`);
@@ -118,6 +130,18 @@ export default function CatalogFormPage() {
                     onChange={(e) => updateField('catalogName', e.target.value)}
                   />
                 </FormField>
+                <FormField
+                  label="Cart Enabled (eCart)"
+                  hint="When true, this catalog appears in the eCart storefront navigation."
+                >
+                  <select
+                    value={form.isCartEnabled ? 'true' : 'false'}
+                    onChange={(e) => updateField('isCartEnabled', e.target.value === 'true')}
+                  >
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                  </select>
+                </FormField>
                 <FormField label="Use Quick Add">
                   <select value={form.useQuickAdd} onChange={(e) => updateField('useQuickAdd', e.target.value)}>
                     <option value="Y">Yes</option>
@@ -132,14 +156,17 @@ export default function CatalogFormPage() {
                     onChange={(e) => updateField('styleSheet', e.target.value)}
                   />
                 </FormField>
-                <FormField label="Header Logo">
-                  <input
-                    type="text"
-                    maxLength={250}
-                    value={form.headerLogo}
-                    onChange={(e) => updateField('headerLogo', e.target.value)}
-                  />
-                </FormField>
+                <EntityImageUpload
+                  entityId={isEdit ? prodCatalogId : undefined}
+                  imageUrl={form.headerLogo}
+                  onImageUrlChange={(url) => updateField('headerLogo', url)}
+                  uploadImage={uploadCatalogImage}
+                  pendingFile={imageFile}
+                  onPendingFileChange={setImageFile}
+                  uploadOnSubmit={!isEdit}
+                  label="Catalog Image (Header Logo)"
+                  hint="Upload catalog logo or banner. On create, the image uploads when you save."
+                />
                 <FormField label="Content Path Prefix">
                   <input
                     type="text"

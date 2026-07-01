@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   addCategoryProduct,
-  fetchCategories,
   fetchCategoryProducts,
   listAllProducts,
   removeCategoryProduct,
   updateCategoryProduct,
 } from '../api/catalogApi';
 import { useAuth } from '../auth/AuthContext';
-import CategoryScopePicker, { useCategoryScopeId } from '../components/CategoryScopePicker';
+import { useCategoryScopeId } from '../components/CategoryScopePicker';
 import FormField from '../components/FormField';
 import { emptyDateTimeLocal, formatDateTimeLocal, toApiDateTime } from '../utils/dateTime';
 
@@ -20,7 +19,6 @@ export default function CategoryProductsPage() {
   const { canAccess } = useAuth();
   const canWrite = canAccess(WRITE_ROLES);
 
-  const [categories, setCategories] = useState([]);
   const [members, setMembers] = useState([]);
   const [productOptions, setProductOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,13 +35,22 @@ export default function CategoryProductsPage() {
   });
 
   useEffect(() => {
-    fetchCategories().then(setCategories).catch(() => setCategories([]));
     listAllProducts()
       .then((res) => setProductOptions(res.content || []))
       .catch(() => setProductOptions([]));
   }, []);
 
   useEffect(() => {
+    setError('');
+    setSuccess('');
+    setEditState({});
+    setAddForm({
+      productId: '',
+      fromDate: emptyDateTimeLocal(),
+      sequenceNum: '1',
+      quantity: '',
+      comments: '',
+    });
     if (!categoryId) {
       setMembers([]);
       return;
@@ -129,17 +136,10 @@ export default function CategoryProductsPage() {
 
   return (
     <div>
-      <CategoryScopePicker categories={categories} />
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      {!categoryId ? (
-        <div className="screenlet">
-          <div className="screenlet-body">
-            <p>Select a category above to view and manage product associations.</p>
-          </div>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <p>Loading products…</p>
       ) : (
         <>

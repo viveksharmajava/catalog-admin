@@ -160,7 +160,7 @@ export default function PartyFormPage() {
       } else {
         const created = await createPerson(partyFormToPayload(form, false));
         setSuccess(`Party created: ${created.firstName} ${created.lastName} (${created.partyId})`);
-        setTimeout(() => navigate(`/party/person/edit/${encodeURIComponent(created.partyId)}`), 1000);
+        setTimeout(() => navigate(`/party/person/${encodeURIComponent(created.partyId)}/person`), 1000);
       }
     } catch (err) {
       setError(err.message || `Failed to ${isEdit ? 'update' : 'create'} party`);

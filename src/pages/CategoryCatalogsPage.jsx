@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   addCategoryProdCatalog,
-  fetchCategories,
   fetchCategoryProdCatalogs,
   fetchProdCatalogCategoryTypes,
   listAllProdCatalogs,
@@ -10,7 +9,7 @@ import {
   updateCategoryProdCatalog,
 } from '../api/catalogApi';
 import { useAuth } from '../auth/AuthContext';
-import CategoryScopePicker, { useCategoryScopeId } from '../components/CategoryScopePicker';
+import { useCategoryScopeId } from '../components/CategoryScopePicker';
 import FormField from '../components/FormField';
 import { emptyDateTimeLocal, formatDateTimeLocal, toApiDateTime } from '../utils/dateTime';
 
@@ -21,7 +20,6 @@ export default function CategoryCatalogsPage() {
   const { canAccess } = useAuth();
   const canWrite = canAccess(WRITE_ROLES);
 
-  const [categories, setCategories] = useState([]);
   const [catalogTypes, setCatalogTypes] = useState([]);
   const [catalogOptions, setCatalogOptions] = useState([]);
   const [mappings, setMappings] = useState([]);
@@ -38,7 +36,6 @@ export default function CategoryCatalogsPage() {
   });
 
   useEffect(() => {
-    fetchCategories().then(setCategories).catch(() => setCategories([]));
     fetchProdCatalogCategoryTypes().then(setCatalogTypes).catch(() => setCatalogTypes([]));
     listAllProdCatalogs()
       .then((res) => setCatalogOptions(res.content || []))
@@ -46,6 +43,15 @@ export default function CategoryCatalogsPage() {
   }, []);
 
   useEffect(() => {
+    setError('');
+    setSuccess('');
+    setEditState({});
+    setAddForm({
+      prodCatalogId: '',
+      prodCatalogCategoryTypeId: 'PCCT_BROWSE_ROOT',
+      fromDate: emptyDateTimeLocal(),
+      sequenceNum: '1',
+    });
     if (!categoryId) {
       setMappings([]);
       return;
@@ -129,17 +135,10 @@ export default function CategoryCatalogsPage() {
 
   return (
     <div>
-      <CategoryScopePicker categories={categories} />
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      {!categoryId ? (
-        <div className="screenlet">
-          <div className="screenlet-body">
-            <p>Select a category above to view and manage catalog associations.</p>
-          </div>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <p>Loading catalog mappings…</p>
       ) : (
         <>

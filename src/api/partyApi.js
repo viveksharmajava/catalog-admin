@@ -170,3 +170,42 @@ export function removeUserLoginSecurityGroup(userLoginId, payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function fetchPartyAddresses(partyId) {
+  return partyRequest(`/party/persons/${encodeURIComponent(partyId)}/addresses`);
+}
+
+export function createPartyAddress(partyId, payload) {
+  return partyRequest(`/party/persons/${encodeURIComponent(partyId)}/addresses`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updatePartyAddress(partyId, partyAddressId, payload) {
+  return partyRequest(
+    `/party/persons/${encodeURIComponent(partyId)}/addresses/${encodeURIComponent(partyAddressId)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deletePartyAddress(partyId, partyAddressId) {
+  return partyRequest(
+    `/party/persons/${encodeURIComponent(partyId)}/addresses/${encodeURIComponent(partyAddressId)}`,
+    {
+      method: 'DELETE',
+    },
+  );
+}
+
+export function setDefaultShippingAddress(partyId, partyAddressId) {
+  return partyRequest(
+    `/party/persons/${encodeURIComponent(partyId)}/addresses/${encodeURIComponent(partyAddressId)}/default-shipping`,
+    {
+      method: 'PUT',
+    },
+  );
+}

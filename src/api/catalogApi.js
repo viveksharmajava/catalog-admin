@@ -211,6 +211,92 @@ export async function importProducts(file) {
   return response.json();
 }
 
+export function downloadCategoryImportTemplate() {
+  return downloadFile('/catalog/categories/import/template', 'category_import_template.xlsx');
+}
+
+export function downloadCategoryExport() {
+  return downloadFile('/catalog/categories/export', 'categories_export.xlsx');
+}
+
+export async function importCategories(file) {
+  const auth = getStoredAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(`${API_BASE}/catalog/categories/import`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    throw new Error('Unauthorized');
+  }
+
+  if (!response.ok) {
+    let message = `Import failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export function downloadProdCatalogImportTemplate() {
+  return downloadFile('/catalog/prod-catalogs/import/template', 'prod_catalog_import_template.xlsx');
+}
+
+export function downloadProdCatalogExport() {
+  return downloadFile('/catalog/prod-catalogs/export', 'prod_catalogs_export.xlsx');
+}
+
+export async function importProdCatalogs(file) {
+  const auth = getStoredAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(`${API_BASE}/catalog/prod-catalogs/import`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    throw new Error('Unauthorized');
+  }
+
+  if (!response.ok) {
+    let message = `Import failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 export function findProdCatalogs(payload) {
   return request('/catalog/prod-catalogs/find', {
     method: 'POST',
@@ -462,18 +548,85 @@ export async function uploadProductImage(productId, size, file) {
 
 /** Use Vite proxy for locally served catalog images when possible. */
 export function resolveProductImageSrc(url) {
+  return resolveCatalogMediaSrc(url);
+}
+
+/** Resolve category, catalog, or product image URLs for preview. */
+export function resolveCatalogMediaSrc(url) {
   if (!url) return '';
   try {
     const parsed = new URL(url, window.location.origin);
-    if (parsed.pathname.startsWith('/catalog/product-images/')) {
+    if (
+      parsed.pathname.startsWith('/catalog/product-images/')
+      || parsed.pathname.startsWith('/catalog/category-images/')
+      || parsed.pathname.startsWith('/catalog/catalog-images/')
+    ) {
       return parsed.pathname;
     }
   } catch {
-    if (url.startsWith('/catalog/product-images/')) {
+    if (
+      url.startsWith('/catalog/product-images/')
+      || url.startsWith('/catalog/category-images/')
+      || url.startsWith('/catalog/catalog-images/')
+    ) {
       return url;
     }
   }
   return url;
+}
+
+async function uploadMultipart(path, file) {
+  const auth = getStoredAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers = {};
+  if (auth?.authHeader) {
+    headers['X-User'] = auth.authHeader;
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorizedResponse();
+    const error = new Error('Unauthorized');
+    error.status = response.status;
+    throw error;
+  }
+
+  if (!response.ok) {
+    let message = `Upload failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body.error) message = body.error;
+      else if (body.message) message = body.message;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export function fetchCategoryImageInfo(categoryId) {
+  return request(`/catalog/categories/${encodeURIComponent(categoryId)}/image`);
+}
+
+export function uploadCategoryImage(categoryId, file) {
+  return uploadMultipart(`/catalog/categories/${encodeURIComponent(categoryId)}/image`, file);
+}
+
+export function fetchCatalogImageInfo(prodCatalogId) {
+  return request(`/catalog/prod-catalogs/${encodeURIComponent(prodCatalogId)}/image`);
+}
+
+export function uploadCatalogImage(prodCatalogId, file) {
+  return uploadMultipart(`/catalog/prod-catalogs/${encodeURIComponent(prodCatalogId)}/image`, file);
 }
 
 function storePath(productStoreId, suffix = '') {
@@ -519,4 +672,15 @@ export function removeStoreCatalog(productStoreId, prodCatalogId, fromDate) {
     `${storePath(productStoreId)}/catalogs/${encodeURIComponent(prodCatalogId)}?${params.toString()}`,
     { method: 'DELETE' },
   );
+}
+
+export function fetchStoreSettings(productStoreId) {
+  return request(storePath(productStoreId, '/settings'));
+}
+
+export function updateStoreSettings(productStoreId, payload) {
+  return request(storePath(productStoreId, '/settings'), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
 }

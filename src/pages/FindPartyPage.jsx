@@ -104,7 +104,7 @@ export default function FindPartyPage() {
                 results.map((row) => (
                   <tr key={row.partyId}>
                     <td>
-                      <Link to={`/party/person/edit/${encodeURIComponent(row.partyId)}`} className="entity-link">
+                      <Link to={`/party/person/${encodeURIComponent(row.partyId)}/person`} className="entity-link">
                         {row.partyId}
                       </Link>
                     </td>

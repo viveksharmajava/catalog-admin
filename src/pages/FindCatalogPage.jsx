@@ -20,6 +20,7 @@ const defaultForm = {
 const columns = [
   { key: 'prodCatalogId', label: 'Catalog ID' },
   { key: 'catalogName', label: 'Catalog Name' },
+  { key: 'isCartEnabled', label: 'Cart Enabled' },
   { key: 'useQuickAdd', label: 'Use Quick Add' },
 ];
 
@@ -170,12 +171,17 @@ export default function FindCatalogPage() {
         <div className="screenlet-title screenlet-title-bar">
           <span>Find Catalog</span>
           {canAccess(WRITE_ROLES) && (
-            <Link to="/catalog/create" className="add-product-link">
-              <span className="add-product-icon" aria-hidden="true">
-                +
-              </span>
-              Add Catalog
-            </Link>
+            <div className="title-bar-actions">
+              <Link to="/catalog/import" className="add-product-link">
+                Bulk Import
+              </Link>
+              <Link to="/catalog/create" className="add-product-link">
+                <span className="add-product-icon" aria-hidden="true">
+                  +
+                </span>
+                Add Catalog
+              </Link>
+            </div>
           )}
         </div>
         <div className="screenlet-body">
@@ -254,13 +260,21 @@ export default function FindCatalogPage() {
                     <tr key={row.prodCatalogId}>
                       <td>
                         <Link
-                          to={`/catalog/${encodeURIComponent(row.prodCatalogId)}/categories`}
+                          to={`/catalog/${encodeURIComponent(row.prodCatalogId)}/catalog`}
                           className="entity-link"
                         >
                           {row.prodCatalogId}
                         </Link>
                       </td>
-                      <td>{row.catalogName}</td>
+                      <td>
+                        <Link
+                          to={`/catalog/${encodeURIComponent(row.prodCatalogId)}/catalog`}
+                          className="entity-link"
+                        >
+                          {row.catalogName}
+                        </Link>
+                      </td>
+                      <td>{row.isCartEnabled === false ? 'False' : 'True'}</td>
                       <td>{row.useQuickAdd === 'Y' ? 'Yes' : 'No'}</td>
                     </tr>
                   ))
